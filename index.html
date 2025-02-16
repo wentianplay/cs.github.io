@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>文天玩小白网络模拟攻防</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .attack-section, .defense-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .status-board {
+            grid-column: 1 / -1;
+            background: #333;
+            color: white;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .attack-btn {
+            background-color: #ff4444;
+            color: white;
+        }
+
+        .defense-btn {
+            background-color: #44ff44;
+            color: #333;
+        }
+
+        .logs {
+            background: black;
+            color: #00ff00;
+            padding: 15px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+        }
+
+        .progress-bar {
+            height: 20px;
+            background: #eee;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+
+        .progress {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <h1>文天玩小白网络模拟攻防</h1>
+    
+    <div class="status-board">
+        <h3>系统状态</h3>
+        <p>安全等级: <span id="security-level">75</span>/100</p>
+        <div class="progress-bar">
+            <div class="progress" id="security-progress" style="width: 75%; background: #4CAF50;"></div>
+        </div>
+        <p>服务器负载: <span id="server-load">25</span>%</p>
+        <div class="progress-bar">
+            <div class="progress" id="load-progress" style="width: 25%; background: #2196F3;"></div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="attack-section">
+            <h2>攻击选项</h2>
+            <button class="attack-btn" onclick="launchAttack('ddos')">DDoS攻击</button>
+            <button class="attack-btn" onclick="launchAttack('phishing')">钓鱼攻击</button>
+            <button class="attack-btn" onclick="launchAttack('malware')">恶意软件</button>
+            <button class="attack-btn" onclick="launchAttack('scan')">漏洞扫描</button>
+        </div>
+
+        <div class="defense-section">
+            <h2>防御措施</h2>
+            <button class="defense-btn" onclick="activateDefense('firewall')">启用防火墙</button>
+            <button class="defense-btn" onclick="activateDefense('encryption')">数据加密</button>
+            <button class="defense-btn" onclick="activateDefense('backup')">数据备份</button>
+            <button class="defense-btn" onclick="activateDefense('2fa')">双因素认证</button>
+        </div>
+    </div>
+
+    <div class="logs">
+        <h3>攻防日志</h3>
+        <div id="log-content"></div>
+    </div>
+
+    <script>
+        let securityLevel = 75;
+        let serverLoad = 25;
+        let defenseStatus = {
+            firewall: false,
+            encryption: false,
+            backup: false,
+            twoFA: false
+        };
+
+        function updateStatus() {
+            document.getElementById('security-level').textContent = securityLevel;
+            document.getElementById('security-progress').style.width = securityLevel + '%';
+            document.getElementById('server-load').textContent = serverLoad;
+            document.getElementById('load-progress').style.width = serverLoad + '%';
+        }
+
+        function addLog(message, type) {
+            const logDiv = document.getElementById('log-content');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `<div class="log-${type}">[${timestamp}] ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function launchAttack(type) {
+            let success = false;
+            let message = '';
+            let damage = 0;
+
+            switch(type) {
+                case 'ddos':
+                    damage = defenseStatus.firewall ? 5 : 15;
+                    serverLoad = Math.min(100, serverLoad + damage);
+                    message = `DDoS攻击已发起，服务器负载增加${damage}%`;
+                    break;
+                case 'phishing':
+                    success = !defenseStatus.twoFA && Math.random() > 0.6;
+                    message = success ? "钓鱼攻击成功！获取用户凭证" : "钓鱼攻击被拦截";
+                    break;
+                case 'malware':
+                    damage = defenseStatus.firewall ? 10 : 25;
+                    securityLevel = Math.max(0, securityLevel - damage);
+                    message = `恶意软件注入，安全等级下降${damage}%`;
+                    break;
+                case 'scan':
+                    success = Math.random() > 0.5;
+                    message = success ? "发现系统漏洞！" : "漏洞扫描未发现可用漏洞";
+                    break;
+            }
+
+            addLog(message, 'attack');
+            updateStatus();
+        }
+
+        function activateDefense(type) {
+            let message = '';
+            switch(type) {
+                case 'firewall':
+                    defenseStatus.firewall = true;
+                    message = "防火墙已启用";
+                    break;
+                case 'encryption':
+                    defenseStatus.encryption = true;
+                    message = "数据加密已启用";
+                    break;
+                case 'backup':
+                    defenseStatus.backup = true;
+                    message = "数据备份已完成";
+                    break;
+                case '2fa':
+                    defenseStatus.twoFA = true;
+                    message = "双因素认证已激活";
+                    break;
+            }
+            addLog(message, 'defense');
+            updateStatus();
+        }
+    </script>
+</body>
+</html>
